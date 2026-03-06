@@ -91,6 +91,8 @@ users:
 ssh_pwauth: true
 packages:
   - git
+  - zsh
+  - fonts-powerline
 write_files:
   - path: /etc/profile.d/cloud-init-status.sh
     permissions: '0755'
@@ -268,6 +270,12 @@ write_files:
       git checkout main
       git fetch origin
 
+      # ── oh-my-zsh with git plugin + agnoster theme ─────────────────
+      RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+      sed -i 's/^ZSH_THEME=.*/ZSH_THEME="agnoster"/' ~/.zshrc
+      sed -i 's/^plugins=(.*)/plugins=(git)/' ~/.zshrc
+      echo 'cd ~/workspace 2>/dev/null || true' >> ~/.zshrc
+
       echo "=== git-lab setup complete ==="
 
   - path: /tmp/reset-git-lab.sh
@@ -290,6 +298,7 @@ runcmd:
   - cp /tmp/reset-git-lab.sh /home/labuser/reset-git-lab.sh
   - chown labuser:labuser /home/labuser/setup-git-lab.sh /home/labuser/reset-git-lab.sh
   - sudo -Hu labuser bash /home/labuser/setup-git-lab.sh
+  - chsh -s /usr/bin/zsh labuser
   - echo "=== git-lab VM is ready! ==="
 USERDATA
 
