@@ -92,6 +92,8 @@ ssh_pwauth: true
 packages:
   - git
   - zsh
+  - vi
+  - nano
   - fonts-powerline
 write_files:
   - path: /etc/profile.d/cloud-init-status.sh
