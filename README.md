@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Linux-lightgrey)](https://github.com/manzolo/qlab)
 
-A [QLab](https://github.com/manzolo/qlab) plugin that boots a virtual machine with Git pre-configured and a complete workspace covering everything from basic commits to git flow. The shell is zsh with oh-my-zsh (agnoster theme + git plugin) for a richer Git experience.
+A [QLab](https://github.com/manzolo/qlab) plugin that boots a virtual machine with Git pre-configured and a complete workspace covering everything from basic commits to git flow. The `git-flow` CLI is installed so you can practice the branching model with real commands. The shell is zsh with oh-my-zsh (agnoster theme + git plugin) for a richer Git experience.
 
 ## Objectives
 
@@ -16,12 +16,12 @@ A [QLab](https://github.com/manzolo/qlab) plugin that boots a virtual machine wi
 - Save and restore work in progress with `git stash`
 - Push, fetch, and pull with a bare remote repository
 - Rebase a branch onto another for linear history
-- Apply the git flow branching model (develop, feature, release, tags)
+- Apply the git flow branching model with the `git-flow` CLI (`git flow init`, `feature start/finish`, `release start/finish`)
 
 ## How It Works
 
 1. **Cloud image**: Downloads a minimal Ubuntu 22.04 cloud image (~250 MB)
-2. **Cloud-init**: Installs `git`, `zsh`, oh-my-zsh, creates `labuser`, sets up the workspace
+2. **Cloud-init**: Installs `git`, `git-flow`, `zsh`, oh-my-zsh, creates `labuser`, sets up the workspace
 3. **Bare repo**: Creates `/srv/git/lab.git` as the local remote origin
 4. **Pre-solved workspace**: `~/workspace` is pre-configured with all exercises completed — tests pass out of the box; reset and redo at any time
 5. **QEMU boot**: Starts the VM in background with SSH port forwarding
@@ -78,7 +78,7 @@ qlab stop git-lab
 | 6 | **Stash** | Stash a modification on `feature/stash`, pop it back, commit |
 | 7 | **Remote** | Explore the bare repo, run `git fetch`, compare local vs origin |
 | 8 | **Rebase** | Verify the linear history of `feature/stash` rebased onto main |
-| 9 | **Git Flow** | Explore develop, release/1.0, tag v1.0, and the full branching model |
+| 9 | **Git Flow** | Use `git flow init`, `feature start/finish`, `release start/finish`; explore develop, release/1.0, tag v1.0 |
 
 ## Reset an Exercise
 
@@ -109,7 +109,7 @@ qlab run git-lab
 qlab test git-lab
 ```
 
-All 9 exercises are tested automatically. Expected output:
+All 9 exercises are tested automatically (Exercise 9 includes a check for the `git-flow` CLI). Expected output:
 
 ```
   Exercises run:     9

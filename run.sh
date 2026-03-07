@@ -18,7 +18,7 @@ echo "    5. Conflicts: detection and resolution"
 echo "    6. Stash: saving and restoring work in progress"
 echo "    7. Remote: push, pull, fetch with a bare repo"
 echo "    8. Rebase: linear history via rebase"
-echo "    9. Git flow: develop, feature, release, tag"
+echo "    9. Git flow: develop, feature, release, tag (git-flow CLI)"
 echo ""
 
 # Source QLab core libraries
@@ -71,7 +71,7 @@ info "Step 2: Cloud-init configuration"
 echo ""
 echo "  cloud-init will:"
 echo "    - Create user 'labuser' with SSH access"
-echo "    - Install git"
+echo "    - Install git and git-flow"
 echo "    - Pre-configure a complete git workspace with all exercises solved"
 echo "    - Set up a bare repo at /srv/git/lab.git as the remote origin"
 echo ""
@@ -91,8 +91,9 @@ users:
 ssh_pwauth: true
 packages:
   - git
+  - git-flow
   - zsh
-  - vi
+  - vim
   - nano
   - fonts-powerline
 write_files:
@@ -127,7 +128,7 @@ write_files:
           06 - Stash            \033[0;32mgit stash list\033[0m
           07 - Remote           \033[0;32mgit remote -v\033[0m
           08 - Rebase           \033[0;32mgit log --oneline feature/stash\033[0m
-          09 - Git flow         \033[0;32mgit tag\033[0m
+          09 - Git flow         \033[0;32mgit flow version\033[0m
 
         \033[1;33mKey paths:\033[0m
           \033[0;32m~/workspace\033[0m       working directory
@@ -240,32 +241,36 @@ write_files:
       git rebase main
       git push --force origin feature/stash
 
-      # ── Exercise 9: git flow ───────────────────────────────────────
+      # ── Exercise 9: git flow (using git-flow CLI) ─────────────────
       git checkout main
+
+      # git flow init -d requires 'develop' to exist; create it first
       git checkout -b develop
       git push origin develop
+      git checkout main
 
-      git checkout -b feature/gitflow-demo
+      # Initialize git-flow with default branch names; set 'v' as tag prefix
+      git flow init -d
+      git config gitflow.prefix.versiontag v
+
+      # Feature: start → commit → push to remote → finish (merges into develop)
+      git flow feature start gitflow-demo
       echo "Git flow feature content" > gitflow-feature.txt
       git add gitflow-feature.txt
       git commit -m "feature/gitflow-demo: add feature content"
       git push origin feature/gitflow-demo
-
-      git checkout develop
-      git merge feature/gitflow-demo --no-ff -m "Merge feature/gitflow-demo into develop"
+      GIT_MERGE_AUTOEDIT=no git flow feature finish gitflow-demo
       git push origin develop
 
-      git checkout -b release/1.0
+      # Release: start → commit → push to remote → finish (merges into main+develop, creates tag)
+      git flow release start 1.0
       echo "" >> README.md
       echo "## Release 1.0" >> README.md
       git add README.md
       git commit -m "release/1.0: prepare release notes"
       git push origin release/1.0
-
-      git checkout main
-      git merge release/1.0 --no-ff -m "Merge release/1.0 into main"
-      git tag -a v1.0 -m "Release version 1.0"
-      git push origin main
+      GIT_MERGE_AUTOEDIT=no git flow release finish -m "Release version 1.0" 1.0
+      git push origin main develop
       git push origin v1.0
 
       # Leave workspace on main in a clean state

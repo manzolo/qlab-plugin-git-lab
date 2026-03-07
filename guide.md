@@ -362,6 +362,8 @@ git rebase -i HEAD~3
 
 ### Theory
 
+> **Note (Ubuntu AVH edition):** `git flow init` stores its configuration inside `.git/config` (not a separate `.gitflow` file). `git flow feature finish` and `git flow release finish` automatically delete both the local and remote branch after merging.
+
 **Git Flow** is a branching model with defined roles for branches:
 - `main` — production-ready code
 - `develop` — integration branch
@@ -371,10 +373,18 @@ git rebase -i HEAD~3
 
 Tags (`v1.0`) mark release points on `main`.
 
+The `git-flow` CLI automates the branch creation, merging, tagging, and deletion steps. It reads its configuration from the `.gitflow` file at the root of the repository.
+
 ### Explore
 
 ```bash
 cd ~/workspace
+
+# Check git-flow version and that it is installed
+git flow version
+
+# See the git-flow configuration (branch names, prefixes)
+cat .gitflow
 
 # See the full git flow graph
 git log --oneline --graph --all
@@ -387,38 +397,67 @@ git show v1.0
 
 # See develop history
 git log --oneline develop
-
-# See release/1.0 commits
-git log --oneline release/1.0
 ```
 
-### Practice — full git flow cycle
+### Practice — full git flow cycle with git-flow CLI
 
 ```bash
-# Start a new feature
-git checkout develop
-git checkout -b feature/my-feature
+cd ~/workspace
+
+# (Already initialized in this lab — shown for reference)
+# git flow init -d
+# git config gitflow.prefix.versiontag v
+
+# ── Feature ──────────────────────────────────────────────────
+# Start a feature branch from develop
+git flow feature start my-feature
+
 echo "new feature" > my-feature.txt
 git add my-feature.txt && git commit -m "feature/my-feature: implement feature"
 
-# Merge into develop
-git checkout develop
-git merge feature/my-feature --no-ff -m "Merge feature/my-feature into develop"
+# Finish: merges feature/my-feature into develop, deletes local branch
+GIT_MERGE_AUTOEDIT=no git flow feature finish my-feature
+git push origin develop
 
-# Create a release
-git checkout -b release/2.0
+# ── Release ──────────────────────────────────────────────────
+# Start a release branch from develop
+git flow release start 2.0
+
 echo "## Release 2.0" >> README.md
 git add README.md && git commit -m "release/2.0: prepare release"
 
-# Finish release — merge into main and tag
-git checkout main
-git merge release/2.0 --no-ff -m "Merge release/2.0 into main"
-git tag -a v2.0 -m "Release version 2.0"
+# Push the release branch to remote before finishing
+git push origin release/2.0
 
-# Push everything
-git push origin main develop release/2.0
+# Finish: merges into main AND develop, creates tag v2.0, deletes local branch
+GIT_MERGE_AUTOEDIT=no git flow release finish -m "Release version 2.0" 2.0
+git push origin main develop
 git push origin v2.0
+
+# ── Hotfix ───────────────────────────────────────────────────
+# Start a hotfix from main
+git flow hotfix start fix-typo
+
+echo "typo fixed" >> README.md
+git add README.md && git commit -m "hotfix/fix-typo: fix typo in README"
+
+# Finish: merges into main AND develop, creates tag, deletes local branch
+GIT_MERGE_AUTOEDIT=no git flow hotfix finish -m "Hotfix fix-typo" fix-typo
+git push origin main develop
+git push origin --tags
 ```
+
+### Quick reference
+
+| Command | What it does |
+|---------|-------------|
+| `git flow init -d` | Initialize git-flow with default branch names |
+| `git flow feature start <name>` | Create `feature/<name>` from develop |
+| `git flow feature finish <name>` | Merge feature into develop, delete branch |
+| `git flow release start <ver>` | Create `release/<ver>` from develop |
+| `git flow release finish <ver>` | Merge into main+develop, tag, delete branch |
+| `git flow hotfix start <name>` | Create `hotfix/<name>` from main |
+| `git flow hotfix finish <name>` | Merge into main+develop, tag, delete branch |
 
 ---
 
